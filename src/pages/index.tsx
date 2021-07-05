@@ -3,6 +3,8 @@ import Head from 'next/head';
 
 import Prismic from '@prismicio/client';
 import { FiCalendar, FiUser } from 'react-icons/fi';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 import { useState } from 'react';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
 import { ReactElement } from 'react';
@@ -39,25 +41,18 @@ export default function Home({ postsPagination }: HomeProps): ReactElement {
       const responseResolved: ApiSearchResponse = await Promise.resolve(
         response.json()
       );
-      const results = responseResolved.results.map(post => {
-        return {
-          uid: post.uid,
-          first_publication_date: new Date(
-            post.last_publication_date
-          ).toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-          }),
-          data: {
-            title: post.data.title,
-            subtitle: post.data.subtitle,
-            author: post.data.author,
-          },
-        };
-      });
-      const { next_page } = responseResolved;
-      setPosts([...posts, ...results]);
+      const { next_page, results } = responseResolved;
+
+      const newPosts: Post[] = results.map(post => ({
+        uid: post.uid,
+        first_publication_date: post.first_publication_date,
+        data: {
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author,
+        },
+      }));
+      setPosts([...posts, ...newPosts]);
       setNextPage(next_page);
     });
   }
@@ -65,19 +60,22 @@ export default function Home({ postsPagination }: HomeProps): ReactElement {
   return (
     <>
       <Head>
-        <title>Posts | Ignews</title>
+        <title>spacetraveling</title>
       </Head>
-      <main className={styles.container}>
+      <main className={`${commonStyles.container} ${styles.container}`}>
+        <img src="logo.svg" alt="logo" />
         {posts.map(post => (
           <div className={styles.posts} key={post.uid}>
-            <a href={`/posts/${post.uid}`}>
+            <a href={`/post/${post.uid}`}>
               <strong>{post.data.title}</strong>
             </a>
             <p>{post.data.subtitle}</p>
             <div className={styles.info}>
               <div>
-                <FiCalendar style={{ marginRight: '0.5rem' }} />
-                <time>{post.first_publication_date}</time>
+                <FiCalendar size={24} style={{ marginRight: '0.5rem' }} />
+                {format(new Date(post.first_publication_date), 'dd MMM u', {
+                  locale: ptBR,
+                })}
               </div>
               <div>
                 <FiUser style={{ marginRight: '0.5rem' }} />
@@ -96,37 +94,40 @@ export default function Home({ postsPagination }: HomeProps): ReactElement {
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps<HomeProps> = async ({
+  preview = false,
+}) => {
   const prismic = getPrismicClient();
-  const postsResponse = await prismic.query(
+  const postResponse = await prismic.query(
     [Prismic.predicates.at('document.type', 'posts')],
     {
-      fetch: ['posts.title', 'posts.subtitle', 'posts.author', 'posts.content'],
-      pageSize: 2,
+      fetch: ['posts.title', 'posts.subtitle', 'posts.author'],
+      pageSize: 5,
     }
   );
-  const results = postsResponse.results.map(post => {
-    return {
-      uid: post.uid,
-      first_publication_date: new Date(
-        post.last_publication_date
-      ).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-      }),
-      data: {
-        title: post.data.title,
-        subtitle: post.data.subtitle,
-        author: post.data.author,
-      },
-    };
-  });
-  const { next_page } = postsResponse;
+
+  const { next_page, results } = postResponse;
+
+  const posts: Post[] = results.map(post => ({
+    uid: post.uid,
+    first_publication_date: post.first_publication_date,
+    data: {
+      title: post.data.title,
+      subtitle: post.data.subtitle,
+      author: post.data.author,
+    },
+  }));
+
+  const timeToRevalidate = 60 * 3;
 
   return {
     props: {
-      postsPagination: { results, next_page },
+      postsPagination: {
+        next_page,
+        results: posts,
+      },
+      preview,
     },
+    revalidate: timeToRevalidate,
   };
 };

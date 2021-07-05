@@ -1,11 +1,14 @@
 .container{
   max-width: 1120px;
-  margin: 0 auto;
   padding: 5rem 13.125rem;
 
   display: flex;
   align-items: flex-start;
   flex-direction: column;
+
+  img{
+    padding: 0.925rem 0;
+  }
 
   button{
     background-color: var(--Background);
