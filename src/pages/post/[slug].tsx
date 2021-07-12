@@ -41,25 +41,30 @@ export default function Post({ post }: PostProps): ReactElement {
         <title>{post.data.title} | spacetraveling</title>
       </Head>
       <Header />
-      <main className={styles.container}>
-        <img src={post.data.banner.url} alt="" />
+      <main className={`${commonStyles.container} ${styles.container}`}>
+        {post.data.banner.url !== null && (
+          <img src={post.data.banner.url} alt="" />
+        )}
+        {console.log(post.data.banner.url)}
         <article className={styles.post}>
           <h1>{post.data.title}</h1>
-          <div>
-            <FiCalendar size={24} style={{ marginRight: '0.5rem' }} />
-            <time>
-              {format(new Date(post.first_publication_date), 'dd MMM u', {
-                locale: ptBR,
-              })}
-            </time>
-          </div>
-          <div>
-            <FiUser size={24} style={{ marginRight: '0.5rem' }} />
-            <p>{post.data.author}</p>
-          </div>
-          <div>
-            <FiClock size={24} style={{ marginRight: '0.5rem' }} />
-            <p>4 min</p>
+          <div className={styles.infos}>
+            <div>
+              <FiCalendar size={24} style={{ marginRight: '0.5rem' }} />
+              <time>
+                {format(new Date(post.first_publication_date), 'dd MMM u', {
+                  locale: ptBR,
+                })}
+              </time>
+            </div>
+            <div>
+              <FiUser size={24} style={{ marginRight: '0.5rem' }} />
+              <p>{post.data.author}</p>
+            </div>
+            <div>
+              <FiClock size={24} style={{ marginRight: '0.5rem' }} />
+              <p>4 min</p>
+            </div>
           </div>
           {post.data.content.map(content => (
             <article key={content.heading}>
@@ -115,7 +120,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       subtitle: response.data.subtitle,
       author: response.data.author,
       banner: {
-        url: response.data.banner.url,
+        url:
+          response.data.banner.url !== undefined
+            ? response.data.banner.url
+            : null,
       },
       content: response.data.content.map(content => {
         return {
@@ -125,8 +133,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       }),
     },
   };
-
-  console.log(post);
 
   return {
     props: {
