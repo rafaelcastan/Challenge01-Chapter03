@@ -9,10 +9,12 @@
 
   h1{
     font-size: 3rem;
+    margin: 5rem 0 1.6rem 0;
   }
 
   .infos{
     display: flex;
+    margin-bottom: 4.65rem;
 
     div{
       display: flex;
@@ -34,7 +36,7 @@
 
   strong{
     color: var(--Heading);
-    font-size: 2.25rem;
+    font-size: 2.5rem;
   }
 
 }

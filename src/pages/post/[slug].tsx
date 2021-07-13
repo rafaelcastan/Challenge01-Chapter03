@@ -7,6 +7,7 @@ import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import { ReactElement } from 'react';
 import { format } from 'date-fns';
 import ptBR from 'date-fns/locale/pt-BR';
+import { useRouter } from 'next/router';
 import { getPrismicClient } from '../../services/prismic';
 
 import commonStyles from '../../styles/common.module.scss';
@@ -35,6 +36,22 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps): ReactElement {
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return <h2>Carregando...</h2>;
+  }
+
+  const totalWords = post.data.content.reduce((total, content) => {
+    // eslint-disable-next-line no-param-reassign
+    total += content.heading;
+    // eslint-disable-next-line no-param-reassign
+    total += RichText.asText(content.body);
+    return total;
+  }, '');
+
+  const readAverage = Math.ceil(totalWords.split(' ').length / 200);
+
   return (
     <>
       <Head>
@@ -63,7 +80,7 @@ export default function Post({ post }: PostProps): ReactElement {
             </div>
             <div>
               <FiClock size={24} style={{ marginRight: '0.5rem' }} />
-              <p>4 min</p>
+              <p>{readAverage} min</p>
             </div>
           </div>
           {post.data.content.map(content => (

@@ -8,6 +8,7 @@ import ptBR from 'date-fns/locale/pt-BR';
 import { useState } from 'react';
 import ApiSearchResponse from '@prismicio/client/types/ApiSearchResponse';
 import { ReactElement } from 'react';
+import Link from 'next/link';
 import { getPrismicClient } from '../services/prismic';
 
 import commonStyles from '../styles/common.module.scss';
@@ -66,22 +67,24 @@ export default function Home({ postsPagination }: HomeProps): ReactElement {
         <img src="logo.svg" alt="logo" />
         {posts.map(post => (
           <div className={styles.posts} key={post.uid}>
-            <a href={`/post/${post.uid}`}>
-              <strong>{post.data.title}</strong>
-            </a>
-            <p>{post.data.subtitle}</p>
-            <div className={styles.info}>
-              <div>
-                <FiCalendar size={24} style={{ marginRight: '0.5rem' }} />
-                {format(new Date(post.first_publication_date), 'dd MMM u', {
-                  locale: ptBR,
-                })}
-              </div>
-              <div>
-                <FiUser style={{ marginRight: '0.5rem' }} />
-                <p>{post.data.author}</p>
-              </div>
-            </div>
+            <Link href={`/post/${post.uid}`}>
+              <a>
+                <strong>{post.data.title}</strong>
+                <p>{post.data.subtitle}</p>
+                <div className={styles.info}>
+                  <div>
+                    <FiCalendar size={24} style={{ marginRight: '0.5rem' }} />
+                    {format(new Date(post.first_publication_date), 'dd MMM u', {
+                      locale: ptBR,
+                    })}
+                  </div>
+                  <div>
+                    <FiUser style={{ marginRight: '0.5rem' }} />
+                    <p>{post.data.author}</p>
+                  </div>
+                </div>
+              </a>
+            </Link>
           </div>
         ))}
         {nextPage && (
