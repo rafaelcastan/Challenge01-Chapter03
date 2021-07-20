@@ -13,6 +13,7 @@ import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import Header from '../../components/Header/index';
+import PreviewButton from '../../components/PreviewButton/index';
 
 interface Post {
   first_publication_date: string | null;
@@ -33,9 +34,10 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  preview: boolean;
 }
 
-export default function Post({ post }: PostProps): ReactElement {
+export default function Post({ post, preview }: PostProps): ReactElement {
   const router = useRouter();
 
   if (router.isFallback) {
@@ -62,7 +64,6 @@ export default function Post({ post }: PostProps): ReactElement {
         {post.data.banner.url !== null && (
           <img src={post.data.banner.url} alt="" />
         )}
-        {console.log(post.data.banner.url)}
         <article className={styles.post}>
           <h1>{post.data.title}</h1>
           <div className={styles.infos}>
@@ -88,6 +89,7 @@ export default function Post({ post }: PostProps): ReactElement {
               <strong>{content.heading}</strong>
               <div
                 className={styles.postContent}
+                // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{
                   __html: RichText.asHtml(content.body),
                 }}
@@ -95,6 +97,7 @@ export default function Post({ post }: PostProps): ReactElement {
             </article>
           ))}
         </article>
+        {preview && <PreviewButton className={styles.PreviewButton} />}
       </main>
     </>
   );
@@ -121,12 +124,18 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const { slug } = params;
 
   const prismic = getPrismicClient();
 
-  const response = await prismic.getByUID('posts', String(slug), {});
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref || null,
+  });
 
   const post = {
     uid: response.uid,
@@ -154,6 +163,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return {
     props: {
       post,
+      preview,
     },
     revalidate: 60 * 60,
   };

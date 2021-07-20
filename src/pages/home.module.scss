@@ -11,13 +11,21 @@
   }
 
   button{
-    background-color: var(--Background);
-    color: var(--Highlight);
     border:none;
 
     font-weight: 600;
     font-size: 1.125rem;
+    line-height: 1.38rem;
   }
+}
+
+.PreviewButton{
+  margin-top: 5.5rem;
+}
+
+.loadMore{
+  background-color: var(--Background);
+  color: var(--Highlight);
 }
 
 .posts{
