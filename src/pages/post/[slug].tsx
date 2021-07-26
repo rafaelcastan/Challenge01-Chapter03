@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { RichText } from 'prismic-dom';
 import Head from 'next/head';
+import Link from 'next/link';
 
 import Prismic from '@prismicio/client';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
@@ -17,6 +18,7 @@ import PreviewButton from '../../components/PreviewButton/index';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -32,12 +34,32 @@ interface Post {
   };
 }
 
+interface Navigation {
+  prevPost: {
+    uid: string;
+    data: {
+      title: string;
+    };
+  }[];
+  nextPost: {
+    uid: string;
+    data: {
+      title: string;
+    };
+  }[];
+}
+
 interface PostProps {
   post: Post;
   preview: boolean;
+  navigation: Navigation;
 }
 
-export default function Post({ post, preview }: PostProps): ReactElement {
+export default function Post({
+  post,
+  preview,
+  navigation,
+}: PostProps): ReactElement {
   const router = useRouter();
 
   if (router.isFallback) {
@@ -74,6 +96,20 @@ export default function Post({ post, preview }: PostProps): ReactElement {
                   locale: ptBR,
                 })}
               </time>
+              <div className={styles.edit}>
+                {post.last_publication_date !== post.first_publication_date && (
+                  <p>
+                    *editado em{' '}
+                    {format(new Date(post.last_publication_date), 'dd MMM u', {
+                      locale: ptBR,
+                    })}
+                    , às{' '}
+                    {format(new Date(post.last_publication_date), 'HH:mm', {
+                      locale: ptBR,
+                    })}
+                  </p>
+                )}
+              </div>
             </div>
             <div>
               <FiUser size={24} style={{ marginRight: '0.5rem' }} />
@@ -96,7 +132,26 @@ export default function Post({ post, preview }: PostProps): ReactElement {
               />
             </article>
           ))}
+          <div className={styles.line} />
         </article>
+        <section className={`${styles.navigation}`}>
+          {navigation?.prevPost.length > 0 && (
+            <div>
+              <p>{navigation.prevPost[0].data.title}</p>
+              <Link href={`/post/${navigation.prevPost[0].uid}`}>
+                <a>Post anterior</a>
+              </Link>
+            </div>
+          )}
+          {navigation?.nextPost.length > 0 && (
+            <div>
+              <p>{navigation.nextPost[0].data.title}</p>
+              <Link href={`/post/${navigation.nextPost[0].uid}`}>
+                <a>Próximo post</a>
+              </Link>
+            </div>
+          )}
+        </section>
         {preview && <PreviewButton className={styles.PreviewButton} />}
       </main>
     </>
@@ -137,6 +192,24 @@ export const getStaticProps: GetStaticProps = async ({
     ref: previewData?.ref || null,
   });
 
+  const prevPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: '[document.first_publication_date desc]',
+    }
+  );
+
+  const nextPost = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'posts')],
+    {
+      pageSize: 1,
+      after: response.id,
+      orderings: '[document.first_publication_date]',
+    }
+  );
+
   const post = {
     uid: response.uid,
     first_publication_date: response.first_publication_date,
@@ -163,6 +236,10 @@ export const getStaticProps: GetStaticProps = async ({
   return {
     props: {
       post,
+      navigation: {
+        prevPost: prevPost?.results,
+        nextPost: nextPost?.results,
+      },
       preview,
     },
     revalidate: 60 * 60,

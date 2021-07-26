@@ -41,6 +41,10 @@
 
 }
 
+.edit{
+  position: absolute;
+  margin-top: 2.5rem;
+}
 
 .post{
   width: 45.063rem;
@@ -55,18 +59,10 @@
       font-size: 1.125rem;
     }
 
-    p, ul {
+    p {
       margin: 1.5rem 0;
       font-size: 1.125rem;
       color: var(--Info);
-    }
-
-    ul {
-      padding-left: 1.5rem;
-
-      li {
-        margin: 0.5rem 0;
-      }
     }
   }
 
@@ -74,4 +70,44 @@
 
 .PreviewButton{
   margin: 5rem 0;
+}
+
+.line {
+  width: 100%;
+  height: 1px;
+  background-color: #D7D7D7;
+  opacity: 0.1;
+  margin: 3.75rem 0 0 0;
+}
+
+.navigation {
+  display: flex;
+  justify-content: space-between;
+
+  width: 45.063rem;
+  margin-bottom: 5rem;
+
+  p {
+    font-size: 1.38rem;
+    color: var(--Heading);
+    margin-bottom: 0.5rem;
+  }
+
+  a {
+    font-size: 1rem;
+    color: var(--Highlight);
+    transition: 0.2s;
+  }
+
+  a:hover {
+    filter: brightness(0.8);
+  }
+
+  div {
+    margin-top: 3rem;
+
+    & + div{
+      text-align: right;
+    }
+  }
 }
