@@ -15,6 +15,7 @@ import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import Header from '../../components/Header/index';
 import PreviewButton from '../../components/PreviewButton/index';
+import Comments from '../../components/Comments/index';
 
 interface Post {
   first_publication_date: string | null;
@@ -76,6 +77,22 @@ export default function Post({
 
   const readAverage = Math.ceil(totalWords.split(' ').length / 200);
 
+  const EditedAt = (): ReactElement => {
+    const dateFormated = format(
+      new Date(post.last_publication_date),
+      "'* editado em' dd MMM yyyy', às' HH':'m",
+      {
+        locale: ptBR,
+      }
+    );
+
+    return (
+      <div className={styles.edit}>
+        <span>{dateFormated}</span>
+      </div>
+    );
+  };
+
   return (
     <>
       <Head>
@@ -96,20 +113,7 @@ export default function Post({
                   locale: ptBR,
                 })}
               </time>
-              <div className={styles.edit}>
-                {post.last_publication_date !== post.first_publication_date && (
-                  <p>
-                    *editado em{' '}
-                    {format(new Date(post.last_publication_date), 'dd MMM u', {
-                      locale: ptBR,
-                    })}
-                    , às{' '}
-                    {format(new Date(post.last_publication_date), 'HH:mm', {
-                      locale: ptBR,
-                    })}
-                  </p>
-                )}
-              </div>
+              <EditedAt />
             </div>
             <div>
               <FiUser size={24} style={{ marginRight: '0.5rem' }} />
@@ -152,6 +156,7 @@ export default function Post({
             </div>
           )}
         </section>
+        <Comments />
         {preview && <PreviewButton className={styles.PreviewButton} />}
       </main>
     </>
